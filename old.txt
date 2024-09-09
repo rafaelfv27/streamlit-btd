@@ -1,0 +1,72 @@
+# import pickle
+# import streamlit as st 
+# import numpy as np
+# from pandas import DataFrame, read_csv
+# from rdkit.Chem import PandasTools, AllChem, DataStructs
+# from streamlit_ketcher import st_ketcher
+
+
+# class MoleculePropertyPrediction:
+#     def __init__(self):
+#         self.read_dataset()
+#         self.load_model()
+#         self.drawing_smiles()
+#         self.process_input()
+#         self.predict()
+#         self.main()
+
+
+#     def read_dataset(self):
+#         self.dataset = read_csv('model/no_missing_data.csv')
+    
+
+#     def load_model(self):
+#         with open('model/model_xgb_512_3.pkl', 'rb') as file:
+#             model = pickle.load(file)
+#         self.model = model
+
+
+#     def drawing_smiles(self):
+#         self.drawn_smiles = st_ketcher()
+#         self.etn = st.number_input('Enter the ETN value:', min_value=0.0, max_value=1.0, value=0.0, step=0.01)
+#         self.max_abs = st.number_input('Enter the Max Abs value:', min_value=0.0, max_value=1.0, value=0.0, step=0.01)
+
+    
+
+#     def process_input(self,smiles, etn, max_abs):
+#         self.input_data = DataFrame({'smiles': [self.drawn_smiles], 'etn': [self.etn], 'max_abs': [self.max_abs]})
+           
+#         PandasTools.AddMoleculeColumnToFrame(self.input_data, smilesCol='smiles')
+        
+#         morgan = [AllChem.GetMorganFingerprintAsBitVect(m, 3, nBits=512) for m in self.input_data['ROMol']]
+#         morgan = [list(i) for i in morgan]
+#         morgan = DataFrame(morgan)
+#         morgan.columns = ['MF_' + str(i) for i in morgan.columns]
+   
+#         morgan['etn'] = self.input_data['etn'].values
+#         morgan['max_abs'] = self.input_data['max_abs'].values
+#         morgan = self.morgan
+
+#     def predict(self):
+#         self.similarity = []
+#         for i in range(len(self.dataset)):
+#             ms = AllChem.MolFromsmiles(self.dataset['smiles'][i])
+#             fp = AllChem.GetMorganFingerprint(ms, 2)
+#             ms = AllChem.MolFromsmiles(self.molecule['smiles'][0])
+#             fp2 = AllChem.GetMorganFingerprint(ms, 2)
+#             similarity = DataStructs.TanimotoSimilarity(fp, fp2)
+#             self.similarity.append(similarity)
+#         self.dataset['Similarity'] = self.similarity
+#         self.dataset = self.dataset.sort_values(by='Similarity', ascending=False)
+#         self.dataset = self.dataset.head(10)
+#         self.prediction = self.model.predict(self.molecule)
+
+
+#     def main(self):
+#         st.write('Top 10 similar molecules:')
+#         st.write(self.dataset)
+#         st.write('Predicted value:', self.prediction)
+
+
+# if __name__ == '__main__':
+#     MoleculePropertyPrediction()
