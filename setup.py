@@ -13,11 +13,12 @@ class MoleculePropertyPrediction:
         self.model = self.load_model()  
    
     def read_dataset(self):
-        dataset = read_csv('model/no_missing_data.csv')
+        dataset = read_csv('models/no_missing_data.csv')
+        print(dataset.head())
         return dataset
 
     def load_model(self):
-        with open('model/model_xgb_512_3.pkl', 'rb') as file:
+        with open('models/model_xgb_512_3.pkl', 'rb') as file:
             model = pickle.load(file)
         return model
     
@@ -29,7 +30,6 @@ class MoleculePropertyPrediction:
         morgan = DataFrame([list(fp) for fp in morgan])
         morgan.columns = ['MF_' + str(i) for i in range(morgan.shape[1])]
         
-        # Include 'etn' and 'max_abs'
         morgan['etn'] = input_data['etn'].values
         morgan['max_abs'] = input_data['max_abs'].values
         
@@ -51,7 +51,7 @@ class MoleculePropertyPrediction:
             similarity_list.append(similarity) 
 
         self.dataset['Similarity'] = similarity_list
-        most_similar_molecules = self.dataset.sort_values(by='Similarity', ascending=False).head(1)
+        most_similar_molecules = self.dataset.sort_values(by='Similarity', ascending=False).head(10)
         return most_similar_molecules
 
     def draw_most_similar_molecule(self, top_similar_molecules):
@@ -64,9 +64,9 @@ class MoleculePropertyPrediction:
     def main(self):
         st.title('Molecule Property Prediction with Similarity')
         
-        # Get SMILES from Ketcher input
         drawn_smiles = st_ketcher()
-        etn = st.number_input('Enter the ETN value:', min_value=0.000, max_value=1.0, value=0.0, step=0.01)
+        solvent = st.selectbox('Select Solvent:', sorted(self.dataset['solvent'].unique()), format_func=lambda x: f"{x} ({self.dataset.loc[self.dataset['solvent'] == x, 'etn'].values[0]})")
+        etn = self.dataset.loc[self.dataset['solvent'] == solvent, 'etn'].values[0]
         max_abs = st.number_input('Enter the Max Abs value:', min_value=0.0, value=0.0, step=0.01)
         
         if st.button('Predict'):
